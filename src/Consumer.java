@@ -2,8 +2,9 @@ import java.io.*;
 
 public class Consumer extends Thread {
     private BufferQueue queue;
-    private volatile boolean run = true;
+    private boolean run = true;
     private int maxValue;
+
     Consumer(BufferQueue queue) {
         this.queue = queue;
     }
@@ -33,8 +34,7 @@ public class Consumer extends Thread {
             if (!queue.isEmpty()){
                 value = queue.remove();
             }
-            if (value < maxValue) {
-                System.out.println("Consumer ended....");
+            if (value <= maxValue) {
                 stopConsuming();
                 break;
             }
@@ -54,6 +54,8 @@ public class Consumer extends Thread {
 
     public void stopConsuming() throws InterruptedException {
         run = false;
+        System.out.println("Consumer ended....");
+        System.out.println("Max Prime Value: " + maxValue);
         queue.notifyEmpty();
     }
 }

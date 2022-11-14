@@ -20,9 +20,11 @@ public class Producer extends Thread {
     }
 
     public void produce() throws InterruptedException {
-        if (n > 3) {
-            queue.add(2);
-            queue.add(3);
+        if (n < 2) {
+            System.out.println("No prime numbers found!");
+            stopProducing();
+            queue.notifyEmpty();
+            return;
         }
         while (run) {
             if (queue.isFull()) {
@@ -31,14 +33,13 @@ public class Producer extends Thread {
             if (!run) {
                 break;
             }
-            for (int i = 5; i < n; i += 2) {
+            for (int i = 2; i <= n; i++) {
                 if (isPrime(i)) {
                     queue.add(i);
                     queue.notifyEmpty();
                     Thread.sleep(1);
                 }
-                if (i == n - 1) {
-                    System.out.println("Production ended....");
+                if (i == n) {
                     queue.notifyEmpty();
                     stopProducing();
                 }
@@ -48,6 +49,7 @@ public class Producer extends Thread {
 
     public void stopProducing() throws InterruptedException {
         run = false;
+        System.out.println("Production ended....");
         queue.notifyFull();
     }
 

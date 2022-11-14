@@ -24,7 +24,7 @@ public class BufferQueue {
     }
 
     public boolean isFull() {
-        return queue.size() > bufferSize;
+        return queue.size() >= bufferSize;
     }
 
     public boolean isEmpty() {
