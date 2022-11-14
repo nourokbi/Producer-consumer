@@ -1,8 +1,9 @@
 // import java.util.Queue;
 
 public class Producer extends Thread {
-    int n;
-    BufferQueue queue;
+    private int n;
+    private BufferQueue queue;
+    private boolean run = true;
 
     Producer(BufferQueue queue, int n) {
         this.n = n;
@@ -23,23 +24,31 @@ public class Producer extends Thread {
             queue.add(2);
             queue.add(3);
         }
-        for (int i = 5; i < n; i += 2) {
-            if (isPrime(i)) {
-                while (queue.isFull()) {
-                    queue.produceWait();
+        while (run) {
+            if (queue.isFull()) {
+                queue.waitFull();
+            }
+            if (!run) {
+                break;
+            }
+            for (int i = 5; i < n; i += 2) {
+                if (isPrime(i)) {
+                    queue.add(i);
+                    queue.notifyEmpty();
+                    Thread.sleep(1);
                 }
-                queue.add(i);
-                queue.concumeNotifyAll();
+                if (i == n - 1) {
+                    System.out.println("Production ended....");
+                    queue.notifyEmpty();
+                    stopProducing();
+                }
             }
         }
     }
 
-    public void stopProducing() {
-        try {
-            queue.produceNotifyAll();
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
+    public void stopProducing() throws InterruptedException {
+        run = false;
+        queue.notifyFull();
     }
 
     public boolean isPrime(int number) {

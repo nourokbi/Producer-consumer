@@ -1,11 +1,10 @@
 import java.util.LinkedList;
-// import java.util.Objects;
 import java.util.Queue;
 
 public class BufferQueue {
     private Queue<Integer> queue = new LinkedList<>();
-    private Object produce = new Object();
-    private Object consume = new Object();
+    private Object empty = new Object();
+    private Object full = new Object();
     private int bufferSize;
 
     BufferQueue(int bufferSize) {
@@ -25,53 +24,34 @@ public class BufferQueue {
     }
 
     public boolean isFull() {
-        if (queue.size() > bufferSize) {
-            return true;
-        }
-        return false;
+        return queue.size() > bufferSize;
     }
 
     public boolean isEmpty() {
-        if (queue.size() == 0) {
-            return true;
-        }
-        return false;
+        return queue.size() == 0;
     }
 
-    public void produceWait() throws InterruptedException {
-        synchronized (produce) {
-            produce.wait();
+    public void waitEmpty() throws InterruptedException {
+        synchronized (empty) {
+            empty.wait();
         }
     }
 
-    public void produceNotifyAll() throws InterruptedException {
-        synchronized (produce) {
-            produce.notifyAll();
+    public void notifyEmpty() throws InterruptedException {
+        synchronized (empty) {
+            empty.notify();
         }
     }
 
-    public void produceNotify() throws InterruptedException {
-        synchronized (produce) {
-            produce.notify();
+    public void waitFull() throws InterruptedException {
+        synchronized (full) {
+            full.wait();
         }
     }
 
-    public void concumeWait() throws InterruptedException {
-        synchronized (consume) {
-            consume.wait();
+    public void notifyFull() throws InterruptedException {
+        synchronized (full) {
+            full.notify();
         }
     }
-
-    public void concumeNotifyAll() throws InterruptedException {
-        synchronized (consume) {
-            consume.notifyAll();
-        }
-    }
-
-    public void concumeNotify() throws InterruptedException {
-        synchronized (consume) {
-            consume.notify();
-        }
-    }
-
 }

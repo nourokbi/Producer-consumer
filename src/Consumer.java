@@ -1,58 +1,59 @@
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 
 public class Consumer extends Thread {
     private BufferQueue queue;
-    private volatile boolean run;
-    private int value;
-
+    private volatile boolean run = true;
+    private int maxValue;
     Consumer(BufferQueue queue) {
         this.queue = queue;
-        run = true;
     }
 
     @Override
     public void run() {
-        consume();
+        try {
+            consume();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
-    public void consume() {
+    public void consume() throws InterruptedException, IOException {
         File myFile = new File("test.txt");
         myFile.delete();
         while (run) {
             if (queue.isEmpty()) {
-                try {
-                    queue.concumeWait();
-                } catch (InterruptedException e) {
-                    throw new RuntimeException(e);
-                }
+                queue.waitEmpty();
             }
-
             if (!run) {
                 break;
             }
-
-            value = queue.remove();
+            int value = 0;
+            if (!queue.isEmpty()){
+                value = queue.remove();
+            }
+            if (value < maxValue) {
+                System.out.println("Consumer ended....");
+                stopConsuming();
+                break;
+            }
+            maxValue = value;
+            FileWriter write = null;
             try {
-                FileWriter write = new FileWriter(myFile, true);
+                write = new FileWriter(myFile, true);
                 write.write(value + "\n");
-                write.close();
             } catch (IOException e) {
                 System.out.println("An error occurred.");
                 e.printStackTrace();
             }
-
-            try {
-                queue.produceNotifyAll();
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            }
+            write.close();
+            queue.notifyFull();
         }
     }
 
     public void stopConsuming() throws InterruptedException {
         run = false;
-        queue.concumeNotifyAll();
+        queue.notifyEmpty();
     }
 }
