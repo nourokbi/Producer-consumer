@@ -3,10 +3,15 @@ import java.io.*;
 public class Consumer extends Thread {
     private BufferQueue queue;
     private boolean run = true;
-    private int maxValue;
+    private int maxValue = 0;
+    private int n;
+    File outFile;
 
-    Consumer(BufferQueue queue) {
+
+    Consumer(BufferQueue queue, int n, File outFile) {
         this.queue = queue;
+        this.n = n;
+        this.outFile = outFile;
     }
 
     @Override
@@ -21,10 +26,13 @@ public class Consumer extends Thread {
     }
 
     public void consume() throws InterruptedException, IOException {
-        File myFile = new File("test.txt");
-        myFile.delete();
+        if (n < 2) {
+            stopConsuming();
+        }
+        outFile.delete();
         while (run) {
             if (queue.isEmpty()) {
+                // System.out.println("watiting.....");
                 queue.waitEmpty();
             }
             if (!run) {
@@ -36,19 +44,20 @@ public class Consumer extends Thread {
             }
             if (value <= maxValue) {
                 stopConsuming();
-                break;
             }
             maxValue = value;
             FileWriter write = null;
             try {
-                write = new FileWriter(myFile, true);
-                write.write(value + "\n");
+                write = new FileWriter(outFile, true);
+                if (value != 0) {
+                    write.write(value + "\n");
+                }
             } catch (IOException e) {
                 System.out.println("An error occurred.");
                 e.printStackTrace();
             }
             write.close();
-            queue.notifyFull();
+            // queue.notifyFull();
         }
     }
 

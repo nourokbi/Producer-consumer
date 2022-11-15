@@ -27,9 +27,9 @@ public class Producer extends Thread {
             return;
         }
         while (run) {
-            if (queue.isFull()) {
-                queue.waitFull();
-            }
+            // if (queue.isFull()) {
+            //     queue.waitFull();
+            // }
             if (!run) {
                 break;
             }
@@ -37,7 +37,7 @@ public class Producer extends Thread {
                 if (isPrime(i)) {
                     queue.add(i);
                     queue.notifyEmpty();
-                    Thread.sleep(1);
+                    Thread.sleep(4);
                 }
                 if (i == n) {
                     queue.notifyEmpty();
@@ -50,7 +50,7 @@ public class Producer extends Thread {
     public void stopProducing() throws InterruptedException {
         run = false;
         System.out.println("Production ended....");
-        queue.notifyFull();
+        // queue.notifyFull();
     }
 
     public boolean isPrime(int number) {
