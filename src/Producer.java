@@ -3,7 +3,8 @@
 public class Producer extends Thread {
     private int n;
     private BufferQueue queue;
-    private boolean run = true;
+    private boolean running = true;
+    private int counterOfPrimes = 0;
 
     Producer(BufferQueue queue, int n) {
         this.n = n;
@@ -24,23 +25,24 @@ public class Producer extends Thread {
             System.out.println("No prime numbers found!");
             stopProducing();
             queue.notifyEmpty();
-            return;
         }
-        while (run) {
+        while (running) {
             // if (queue.isFull()) {
             //     queue.waitFull();
             // }
-            if (!run) {
+            if (!running) {
                 break;
             }
             for (int i = 2; i <= n; i++) {
                 if (isPrime(i)) {
                     queue.add(i);
+                    counterOfPrimes++;
                     queue.notifyEmpty();
                     Thread.sleep(4);
                 }
                 if (i == n) {
                     queue.notifyEmpty();
+                    // System.out.println("Counter of Prime numbers: "+getPrimeCount());
                     stopProducing();
                 }
             }
@@ -48,18 +50,20 @@ public class Producer extends Thread {
     }
 
     public void stopProducing() throws InterruptedException {
-        run = false;
+        running = false;
         System.out.println("Production ended....");
         // queue.notifyFull();
     }
 
+    public int getPrimeCount() {
+        return counterOfPrimes;
+    }
+
     public boolean isPrime(int number) {
-        if (number <= 1) {
-            return false;
-        }
+        if (number <= 1) return false;
+        
         for (int i = 2; i <= number / 2; i++) {
-            if ((number % i) == 0)
-                return false;
+            if ((number % i) == 0) return false;
         }
         return true;
     }

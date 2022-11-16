@@ -2,16 +2,17 @@ import java.io.*;
 
 public class Consumer extends Thread {
     private BufferQueue queue;
-    private boolean run = true;
+    private boolean running = true;
     private int maxValue = 0;
+    private int maxPrimeValue;
     private int n;
-    File outFile;
+    File outputFile;
 
 
-    Consumer(BufferQueue queue, int n, File outFile) {
+    Consumer(BufferQueue queue, int n, File outputFile) {
         this.queue = queue;
         this.n = n;
-        this.outFile = outFile;
+        this.outputFile = outputFile;
     }
 
     @Override
@@ -29,42 +30,40 @@ public class Consumer extends Thread {
         if (n < 2) {
             stopConsuming();
         }
-        outFile.delete();
-        while (run) {
+        outputFile.delete();
+        FileWriter writer = new FileWriter(outputFile, true);
+        while (running) {
             if (queue.isEmpty()) {
-                // System.out.println("watiting.....");
                 queue.waitEmpty();
             }
-            if (!run) {
+            if (!running) {
                 break;
             }
-            int value = 0;
+            int currentValue = 0;
             if (!queue.isEmpty()){
-                value = queue.remove();
+                currentValue = queue.remove();
             }
-            if (value <= maxValue) {
+            if (currentValue <= maxValue) {
+                maxPrimeValue = maxValue;
                 stopConsuming();
             }
-            maxValue = value;
-            FileWriter write = null;
-            try {
-                write = new FileWriter(outFile, true);
-                if (value != 0) {
-                    write.write(value + "\n");
-                }
-            } catch (IOException e) {
-                System.out.println("An error occurred.");
-                e.printStackTrace();
+            maxValue = currentValue;
+            if (currentValue != 0) {
+                writer.write(currentValue + "\n");
             }
-            write.close();
             // queue.notifyFull();
         }
+        writer.close();
+    }
+
+    public int getMaxValue() {
+        return maxPrimeValue;
     }
 
     public void stopConsuming() throws InterruptedException {
-        run = false;
+        running = false;
         System.out.println("Consumer ended....");
-        System.out.println("Max Prime Value: " + maxValue);
-        queue.notifyEmpty();
+        // System.out.println("Max Prime Value: " + maxValue);
+        queue.notifyEmpty();    
     }
 }
