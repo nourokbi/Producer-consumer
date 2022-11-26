@@ -8,7 +8,6 @@ public class Consumer extends Thread {
     private int n;
     File outputFile;
 
-
     Consumer(BufferQueue queue, int n, File outputFile) {
         this.queue = queue;
         this.n = n;
@@ -33,6 +32,7 @@ public class Consumer extends Thread {
         outputFile.delete();
         FileWriter writer = new FileWriter(outputFile, true);
         while (running) {
+            // Thread.sleep(5);
             if (queue.isEmpty()) {
                 queue.waitEmpty();
             }
@@ -40,7 +40,7 @@ public class Consumer extends Thread {
                 break;
             }
             int currentValue = 0;
-            if (!queue.isEmpty()){
+            if (!queue.isEmpty()) {
                 currentValue = queue.remove();
             }
             if (currentValue <= maxValue) {
@@ -51,7 +51,7 @@ public class Consumer extends Thread {
             if (currentValue != 0) {
                 writer.write(currentValue + "\n");
             }
-            // queue.notifyFull();
+            queue.notifyFull();
         }
         writer.close();
     }
@@ -64,6 +64,6 @@ public class Consumer extends Thread {
         running = false;
         System.out.println("Consumer ended....");
         // System.out.println("Max Prime Value: " + maxValue);
-        queue.notifyEmpty();    
+        queue.notifyEmpty();
     }
 }

@@ -1,5 +1,3 @@
-// import java.util.Queue;
-
 public class Producer extends Thread {
     private int n;
     private BufferQueue queue;
@@ -27,9 +25,9 @@ public class Producer extends Thread {
             queue.notifyEmpty();
         }
         while (running) {
-            // if (queue.isFull()) {
-            //     queue.waitFull();
-            // }
+            if (queue.isFull()) {
+                queue.waitFull();
+            }
             if (!running) {
                 break;
             }
@@ -38,7 +36,7 @@ public class Producer extends Thread {
                     queue.add(i);
                     counterOfPrimes++;
                     queue.notifyEmpty();
-                    Thread.sleep(4);
+                    Thread.sleep(5);
                 }
                 if (i == n) {
                     queue.notifyEmpty();
@@ -52,7 +50,7 @@ public class Producer extends Thread {
     public void stopProducing() throws InterruptedException {
         running = false;
         System.out.println("Production ended....");
-        // queue.notifyFull();
+        queue.notifyFull();
     }
 
     public int getPrimeCount() {
@@ -60,10 +58,12 @@ public class Producer extends Thread {
     }
 
     public boolean isPrime(int number) {
-        if (number <= 1) return false;
-        
+        if (number <= 1)
+            return false;
+
         for (int i = 2; i <= number / 2; i++) {
-            if ((number % i) == 0) return false;
+            if ((number % i) == 0)
+                return false;
         }
         return true;
     }
